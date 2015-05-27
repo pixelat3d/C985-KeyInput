@@ -17,7 +17,7 @@ class App:
     hid_vendor_id = 0x07CA
     hid_product_id = 0x9850
     hid_device_list = None
-    button_depressed = False
+    sound_enabled = True
 
     #https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731%28v=vs.85%29.aspx
     ptt_key = 0xC0
@@ -26,7 +26,7 @@ class App:
         self.hid_device_list = hid.HidDeviceFilter( vendor_id = self.hid_vendor_id, product_id = self.hid_product_id )
         self.hid_device_list = self.hid_device_list.get_devices( )
 
-        print "Press Control+C to Quit -- Looking for Device... "
+        print "Looking for Device... \nPress Control+C to Quit"
 
         if self.hid_device_list:
             for device in self.hid_device_list:
@@ -37,7 +37,7 @@ class App:
             print "Oh No, no devices were found! \n"
 
         while True:
-            time.sleep( 100 ) #HID input/keysend on separate thread.
+            time.sleep( 1000 ) #HID input/keysend on separate thread.
 
     def raw_input_callback( self, data ):
         # So we know from pushing out the output (data)
@@ -48,12 +48,18 @@ class App:
         #keys so it doesn't really matter what window we actually send the event to.
 
         if data[2] == 1:
-            keybd_event( self.ptt_key, 0, 0x0000, 0 )
+            if self.sound_enabled:
+                winsound.PlaySound( "mic-open.wav", winsound.SND_ALIAS )
+
             print "Microphone open"
+            keybd_event( self.ptt_key, 0, 0x0000, 0 )
         elif data[2] == 0:
-            keybd_event( self.ptt_key, 0, 0x0002, 0 )
+            if self.sound_enabled:
+                winsound.PlaySound( "mic-closed.wav", winsound.SND_ALIAS )
+
             print "Microphone closed"
+            keybd_event( self.ptt_key, 0, 0x0002, 0 )
 
 if __name__ == '__main__':
-    app = App();
-    app.start();
+    app = App( )
+    app.start( )
