@@ -12,6 +12,7 @@
 import time
 import pywinusb.hid as hid
 from win32api import keybd_event
+import winsound
 
 class App:
     hid_vendor_id = 0x07CA
